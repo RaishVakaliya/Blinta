@@ -33,7 +33,8 @@ export default function login() {
           />
         </View>
         <Text style={styles.appName}>Blinta</Text>
-        <Text style={styles.tagline}>don't miss anything</Text>
+        <Text style={styles.tagline}>Don't Miss Anything</Text>
+        <Text style={styles.tagline}>Be Simple, Be Social</Text>
       </View>
 
       <View style={styles.illustrationContainer}>

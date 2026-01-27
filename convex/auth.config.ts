@@ -1,7 +1,7 @@
 export default {
   providers: [
     {
-      domain: "https://comic-bass-91.clerk.accounts.dev",
+      domain: process.env.CLERK_DOMAIN_URL,
       applicationID: "convex",
     },
   ],
