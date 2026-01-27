@@ -6,7 +6,6 @@ import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { useState } from "react";
-// import LottieView from "lottie-react-native";
 import {
   FlatList,
   RefreshControl,
@@ -38,20 +37,7 @@ export default function Index() {
       {/* HEADER */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
-          {/* <LottieView
-            source={require("../../assets/images/logo-transparent.json")}
-            // style={{ width: 40, height: 40 }}
-            style={styles.logo}
-            autoPlay={true}
-            loop={true}
-          /> */}
-          {/* <Image
-            source={require("../../assets/images/1.png")}
-            style={styles.logo}
-            contentFit="contain"
-          /> */}
           <AnimatedGradientText text="Blinta" textStyle={styles.headerTitle} />
-          {/* <Text style={styles.headerTitle}>Blinta</Text> */}
         </View>
         <TouchableOpacity onPress={() => signOut()}>
           <Ionicons name="log-out-outline" size={24} color={COLORS.white} />

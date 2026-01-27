@@ -1,8 +1,8 @@
-import { api } from '@/convex/_generated/api'
-import { Doc } from '@/convex/_generated/dataModel'
-import { useAuth } from '@clerk/clerk-expo'
-import { useQuery, useMutation } from 'convex/react'
-import { useState } from 'react'
+import { api } from "@/convex/_generated/api";
+import { Doc } from "@/convex/_generated/dataModel";
+import { useAuth } from "@clerk/clerk-expo";
+import { useQuery, useMutation } from "convex/react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -11,48 +11,42 @@ import {
   FlatList,
   TouchableWithoutFeedback,
   Platform,
-} from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { COLORS } from '@/constants/theme' // Ensure COLORS is imported
-import { Loader } from '@/components/Loader' // Ensure Loader component is defined
-import { styles } from '@/styles/profile.styles'
-import { Image } from 'expo-image'
-import { Modal } from 'react-native'
-import { Keyboard } from 'react-native'
-import { KeyboardAvoidingView } from 'react-native'
-import { TextInput } from 'react-native'
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { COLORS } from "@/constants/theme";
+import { Loader } from "@/components/Loader";
+import { styles } from "@/styles/profile.styles";
+import { Image } from "expo-image";
+import { Modal } from "react-native";
+import { Keyboard } from "react-native";
+import { KeyboardAvoidingView } from "react-native";
+import { TextInput } from "react-native";
 
 export default function Profile() {
-  const { signOut, userId } = useAuth()
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false)
+  const { signOut, userId } = useAuth();
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
-  // Fetch user data
   const currentUser = useQuery(
     api.users.getUserByClerkId,
-    userId ? { clerkId: userId } : 'skip'
-  )
+    userId ? { clerkId: userId } : "skip",
+  );
 
-  // Handle profile editing state
   const [editedProfile, setEditedProfile] = useState({
-    fullname: currentUser?.fullname || '',
-    bio: currentUser?.bio || '',
-  })
+    fullname: currentUser?.fullname || "",
+    bio: currentUser?.bio || "",
+  });
 
-  // Handle selected post
-  const [selectedPost, setSelectedPost] = useState<Doc<'posts'> | null>(null)
-  const posts = useQuery(api.posts.getPostsByUser, {})
+  const [selectedPost, setSelectedPost] = useState<Doc<"posts"> | null>(null);
+  const posts = useQuery(api.posts.getPostsByUser, {});
 
-  // Mutation to update profile
-  const updateProfile = useMutation(api.users.updateProfile)
+  const updateProfile = useMutation(api.users.updateProfile);
 
-  // Handle saving profile
   const handleSaveProfile = async () => {
-    await updateProfile(editedProfile)
-    setIsEditModalVisible(false)
-  }
+    await updateProfile(editedProfile);
+    setIsEditModalVisible(false);
+  };
 
-  // Show loader if data is still loading
-  if (!currentUser || posts === undefined) return <Loader />
+  if (!currentUser || posts === undefined) return <Loader />;
 
   return (
     <View style={styles.container}>
@@ -74,7 +68,7 @@ export default function Profile() {
           <View style={styles.avatarAndStats}>
             <View style={styles.avatarContainer}>
               <Image
-                source={currentUser.image} // Ensure image is properly formatted
+                source={currentUser.image}
                 style={styles.avatar}
                 contentFit="cover"
                 transition={200}
@@ -125,14 +119,14 @@ export default function Profile() {
           data={posts}
           numColumns={3}
           scrollEnabled={false}
-          //keyExtractor={(item) => item._id} // Ensure each item has a unique key
+          //keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.gridItem}
-              onPress={() => setSelectedPost(item)} // Fixed arrow function syntax
+              onPress={() => setSelectedPost(item)}
             >
               <Image
-                source={item.imageUrl} // Ensure image is properly formatted
+                source={item.imageUrl}
                 style={styles.gridImage}
                 contentFit="cover"
                 transition={200}
@@ -151,7 +145,7 @@ export default function Profile() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.modalContainer}
           >
             <View style={styles.modalContent}>
@@ -219,7 +213,7 @@ export default function Profile() {
               {/* Selected Image */}
               <Image
                 source={selectedPost.imageUrl}
-                cachePolicy={'memory-disk'}
+                cachePolicy={"memory-disk"}
                 style={styles.postDetailImage}
               />
             </View>
@@ -227,21 +221,21 @@ export default function Profile() {
         </View>
       </Modal>
     </View>
-  )
+  );
 }
 
 function NoPostsFound() {
   return (
     <View
       style={{
-        height: '100%',
+        height: "100%",
         backgroundColor: COLORS.background,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
       <Ionicons name="images-outline" size={48} color={COLORS.primary} />
       <Text>No posts yet</Text>
     </View>
-  )
+  );
 }

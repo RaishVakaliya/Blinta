@@ -37,7 +37,6 @@ export default function UserProfileScreen() {
   const toggleFollow = useMutation(api.users.toggleFollow);
 
   const handleBack = () => {
-    // navigation logic (e.g., navigation.goBack())
     if (router.canGoBack()) router.back();
     else router.replace("/(tabs)");
   };

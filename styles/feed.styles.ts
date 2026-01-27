@@ -221,11 +221,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: 40, // adjust as needed
+    width: 40,
     height: 40,
-    marginRight: 8, // spacing between logo and text
+    marginRight: 8,
   },
-  // profile
   postDetailContainer: {
     backgroundColor: COLORS.background,
     maxHeight: height * 0.9,

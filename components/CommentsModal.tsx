@@ -1,7 +1,7 @@
-import { api } from '@/convex/_generated/api'
-import { Id } from '@/convex/_generated/dataModel'
-import { useMutation, useQuery } from 'convex/react'
-import { useState } from 'react'
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -11,38 +11,38 @@ import {
   KeyboardAvoidingView,
   Platform,
   TextInput,
-} from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { Loader } from './Loader'
-import { styles } from '@/styles/feed.styles'
-import Comment from './Comment'
-import { COLORS } from '@/constants/theme'
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Loader } from "./Loader";
+import { styles } from "@/styles/feed.styles";
+import Comment from "./Comment";
+import { COLORS } from "@/constants/theme";
 
 type CommentsModal = {
-  postId: Id<'posts'>
-  visible: boolean
-  onClose: () => void
-}
+  postId: Id<"posts">;
+  visible: boolean;
+  onClose: () => void;
+};
 
 export default function CommentsModal({
   postId,
   visible,
   onClose,
 }: CommentsModal) {
-  const [newComment, setNewComment] = useState('')
-  const comments = useQuery(api.comments.getComments, { postId })
-  const addComment = useMutation(api.comments.addComment)
+  const [newComment, setNewComment] = useState("");
+  const comments = useQuery(api.comments.getComments, { postId });
+  const addComment = useMutation(api.comments.addComment);
 
   const handleAddComment = async () => {
-    if (!newComment.trim()) return // Prevent empty comments
+    if (!newComment.trim()) return;
     try {
-      await addComment({ content: newComment, postId })
+      await addComment({ content: newComment, postId });
 
-      setNewComment('') // Clear input
+      setNewComment("");
     } catch (error) {
-      console.error('Error adding comment:', error)
+      console.error("Error adding comment:", error);
     }
-  }
+  };
 
   return (
     <Modal
@@ -52,7 +52,7 @@ export default function CommentsModal({
       onRequestClose={onClose}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.modalContainer}
       >
         {/* Header */}
@@ -101,5 +101,5 @@ export default function CommentsModal({
         </View>
       </KeyboardAvoidingView>
     </Modal>
-  )
+  );
 }

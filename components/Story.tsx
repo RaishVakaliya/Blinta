@@ -1,12 +1,12 @@
-import { styles } from '@/styles/feed.styles'
-import { View, Text, Image, TouchableOpacity } from 'react-native'
+import { styles } from "@/styles/feed.styles";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 
 type Story = {
-  id: string
-  username: string
-  avatar: string
-  hasStory: boolean
-}
+  id: string;
+  username: string;
+  avatar: string;
+  hasStory: boolean;
+};
 
 export default function Story({ story }: { story: Story }) {
   return (
@@ -16,5 +16,5 @@ export default function Story({ story }: { story: Story }) {
       </View>
       <Text style={styles.storyUsername}>{story.username}</Text>
     </TouchableOpacity>
-  )
+  );
 }

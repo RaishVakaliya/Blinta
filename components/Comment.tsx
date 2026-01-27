@@ -1,14 +1,14 @@
-import { View, Text, Image } from 'react-native'
-import { styles } from '@/styles/feed.styles'
-import { formatDistanceToNow } from 'date-fns'
+import { View, Text, Image } from "react-native";
+import { styles } from "@/styles/feed.styles";
+import { formatDistanceToNow } from "date-fns";
 
 interface Comment {
-  content: string
-  _creationTime: number
+  content: string;
+  _creationTime: number;
   user: {
-    fullname?: string //?added
-    image?: string //?added
-  }
+    fullname?: string;
+    image?: string;
+  };
 }
 
 export default function Comment({ comment }: { comment: Comment }) {
@@ -26,5 +26,5 @@ export default function Comment({ comment }: { comment: Comment }) {
         </Text>
       </View>
     </View>
-  )
+  );
 }

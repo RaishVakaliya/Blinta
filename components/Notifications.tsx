@@ -1,11 +1,11 @@
-import { COLORS } from '@/constants/theme'
-import { styles } from '@/styles/notifications.styles'
-import { Ionicons } from '@expo/vector-icons'
-import { formatDistanceToNow } from 'date-fns'
-import { Image } from 'expo-image'
-import { Link } from 'expo-router'
-import React from 'react'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { COLORS } from "@/constants/theme";
+import { styles } from "@/styles/notifications.styles";
+import { Ionicons } from "@expo/vector-icons";
+import { formatDistanceToNow } from "date-fns";
+import { Image } from "expo-image";
+import { Link } from "expo-router";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Notification({ notification }: { notification: any }) {
   return (
@@ -20,9 +20,9 @@ export default function Notification({ notification }: { notification: any }) {
               transition={200}
             />
             <View style={styles.iconBadge}>
-              {notification.type === 'like' ? (
+              {notification.type === "like" ? (
                 <Ionicons name="heart" size={14} color={COLORS.primary} />
-              ) : notification.type === 'follow' ? (
+              ) : notification.type === "follow" ? (
                 <Ionicons name="person-add" size={14} color="#8B5CF6" />
               ) : (
                 <Ionicons name="chatbubble" size={14} color="#3B82F6" />
@@ -41,10 +41,10 @@ export default function Notification({ notification }: { notification: any }) {
             </TouchableOpacity>
           </Link>
           <Text style={styles.action}>
-            {notification.type === 'follow'
-              ? 'started following you'
-              : notification.type === 'like'
-                ? 'liked your post'
+            {notification.type === "follow"
+              ? "started following you"
+              : notification.type === "like"
+                ? "liked your post"
                 : `commented: "${notification.comment}"`}
           </Text>
           <Text style={styles.timeAgo}>
@@ -63,5 +63,5 @@ export default function Notification({ notification }: { notification: any }) {
         />
       )}
     </View>
-  )
+  );
 }

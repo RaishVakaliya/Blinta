@@ -1,9 +1,9 @@
-import { COLORS } from '@/constants/theme'
-import { styles } from '@/styles/create.styles'
-import { useUser } from '@clerk/clerk-expo'
-import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import { useState } from 'react'
+import { COLORS } from "@/constants/theme";
+import { styles } from "@/styles/create.styles";
+import { useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -13,63 +13,63 @@ import {
   ActivityIndicator,
   ScrollView,
   TextInput,
-} from 'react-native'
-import { Image } from 'expo-image'
-import * as ImagePicker from 'expo-image-picker'
-import * as FileSystem from 'expo-file-system'
-import { useMutation } from 'convex/react'
-import { api } from '@/convex/_generated/api'
+} from "react-native";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function CreateScreen() {
-  const router = useRouter()
-  const { user } = useUser()
+  const router = useRouter();
+  const { user } = useUser();
 
-  const [caption, setCaption] = useState('')
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const [isSharing, setIsSharing] = useState(false)
+  const [caption, setCaption] = useState("");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
-    })
-    if (!result.canceled) setSelectedImage(result.assets[0].uri)
-  }
+    });
+    if (!result.canceled) setSelectedImage(result.assets[0].uri);
+  };
 
-  const generateUploadUrl = useMutation(api.posts.generateUploadUrl)
-  const createPost = useMutation(api.posts.createPost)
+  const generateUploadUrl = useMutation(api.posts.generateUploadUrl);
+  const createPost = useMutation(api.posts.createPost);
 
   const handleShare = async () => {
-    if (!selectedImage) return
+    if (!selectedImage) return;
     try {
-      setIsSharing(true)
-      const uploadUrl = await generateUploadUrl()
+      setIsSharing(true);
+      const uploadUrl = await generateUploadUrl();
 
       const uploadResult = await FileSystem.uploadAsync(
         uploadUrl,
         selectedImage,
         {
-          httpMethod: 'POST',
+          httpMethod: "POST",
           uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-          mimeType: 'image/jpeg',
-        }
-      )
-      if (uploadResult.status != 200) throw new Error('Upload failed')
-      const { storageId } = JSON.parse(uploadResult.body)
-      await createPost({ storageId, caption })
+          mimeType: "image/jpeg",
+        },
+      );
+      if (uploadResult.status != 200) throw new Error("Upload failed");
+      const { storageId } = JSON.parse(uploadResult.body);
+      await createPost({ storageId, caption });
 
-      setSelectedImage(null)
-      setCaption('')
+      setSelectedImage(null);
+      setCaption("");
 
-      router.push('/(tabs)')
+      router.push("/(tabs)");
     } catch (error) {
-      console.log('Error Sharing Post')
+      console.log("Error Sharing Post");
     } finally {
-      setIsSharing(false)
+      setIsSharing(false);
     }
-  }
+  };
 
   if (!selectedImage) {
     return (
@@ -89,22 +89,22 @@ export default function CreateScreen() {
           <Text style={styles.emptyImageText}>Tap to select an image</Text>
         </TouchableOpacity>
       </View>
-    )
+    );
   }
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
       <View style={styles.contentContainer}>
         {/*Header */}
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => {
-              setSelectedImage(null)
-              setCaption('')
+              setSelectedImage(null);
+              setCaption("");
             }}
             disabled={isSharing}
           >
@@ -182,5 +182,5 @@ export default function CreateScreen() {
         </ScrollView>
       </View>
     </KeyboardAvoidingView>
-  )
+  );
 }
