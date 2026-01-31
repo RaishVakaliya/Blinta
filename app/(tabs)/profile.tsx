@@ -46,6 +46,7 @@ export default function Profile() {
   const posts = useQuery(api.posts.getPostsByUser, {});
 
   const hiddenUserIds = useQuery(api.hiddenUsers.getHiddenUsers);
+  const mutedStoryUserIds = useQuery(api.stories.getMutedUsers);
 
   const updateProfile = useMutation(api.users.updateProfile);
   const generateStoryUploadUrl = useMutation(api.stories.generateUploadUrl);
@@ -111,21 +112,21 @@ export default function Profile() {
         <View style={styles.profileInfo}>
           {/* AVATAR & STATS */}
           <View style={styles.avatarAndStats}>
-            <Image
-              source={currentUser.image}
-              style={styles.avatar}
-              contentFit="cover"
-              transition={200}
-            />
-            <TouchableOpacity
-              style={styles.avatarContainer}
-              onPress={handleAddStory}
-              disabled={isUploadingStory}
-            >
-              <View style={styles.storyPlusBadge}>
-                <Ionicons name="add-circle" size={22} color="#000" />
-              </View>
-            </TouchableOpacity>
+            <View style={styles.avatarContainer}>
+              <Image
+                source={currentUser.image}
+                style={styles.avatar}
+                contentFit="cover"
+                transition={200}
+              />
+              <TouchableOpacity
+                style={styles.storyPlusBadge}
+                onPress={handleAddStory}
+                disabled={isUploadingStory}
+              >
+                <Ionicons name="add-circle" size={22} color={COLORS.primary} />
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.statsContainer}>
               <View style={styles.statItem}>
@@ -293,11 +294,13 @@ export default function Profile() {
                 </TouchableOpacity>
               </View>
 
-              {hiddenUserIds === undefined ? (
+              {hiddenUserIds === undefined ||
+              mutedStoryUserIds === undefined ? (
                 <View style={styles.centered}>
                   <Loader />
                 </View>
-              ) : hiddenUserIds.length === 0 ? (
+              ) : hiddenUserIds.length === 0 &&
+                mutedStoryUserIds.length === 0 ? (
                 <View style={styles.centered}>
                   <Text style={{ color: COLORS.grey }}>
                     You haven&apos;t hidden any accounts.
@@ -305,12 +308,46 @@ export default function Profile() {
                 </View>
               ) : (
                 <ScrollView>
-                  {hiddenUserIds.map((userId) => (
-                    <HiddenUserItem
-                      key={userId}
-                      userId={userId as Id<"users">}
-                    />
-                  ))}
+                  {hiddenUserIds.length > 0 && (
+                    <>
+                      <Text
+                        style={{
+                          color: COLORS.grey,
+                          fontSize: 13,
+                          marginBottom: 8,
+                        }}
+                      >
+                        Hidden feed accounts
+                      </Text>
+                      {hiddenUserIds.map((userId) => (
+                        <HiddenUserItem
+                          key={userId}
+                          userId={userId as Id<"users">}
+                        />
+                      ))}
+                    </>
+                  )}
+
+                  {mutedStoryUserIds.length > 0 && (
+                    <>
+                      <Text
+                        style={{
+                          color: COLORS.grey,
+                          fontSize: 13,
+                          marginTop: 16,
+                          marginBottom: 8,
+                        }}
+                      >
+                        Hidden story accounts
+                      </Text>
+                      {mutedStoryUserIds.map((userId) => (
+                        <HiddenStoryUserItem
+                          key={userId}
+                          userId={userId as Id<"users">}
+                        />
+                      ))}
+                    </>
+                  )}
                 </ScrollView>
               )}
             </View>
@@ -368,6 +405,60 @@ function HiddenUserItem({ userId }: { userId: Id<"users"> }) {
         onPress={handleUnhide}
       >
         <Text style={{ color: COLORS.white, fontWeight: "600" }}>Unhide</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function HiddenStoryUserItem({ userId }: { userId: Id<"users"> }) {
+  const user = useQuery(api.users.getUserProfile, { id: userId });
+  const toggleMute = useMutation(api.stories.toggleMuteUser);
+
+  if (user === undefined) {
+    return null;
+  }
+
+  const handleUnmute = async () => {
+    try {
+      await toggleMute({ mutedUserId: userId });
+    } catch (error) {
+      console.error("Error unmuting story user:", error);
+    }
+  };
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 8,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <Image
+          source={user.image}
+          style={{ width: 40, height: 40, borderRadius: 20 }}
+          contentFit="cover"
+          transition={200}
+        />
+        <View>
+          <Text style={styles.name}>{user.fullname}</Text>
+          <Text style={{ color: COLORS.grey }}>@{user.username}</Text>
+        </View>
+      </View>
+      <TouchableOpacity
+        style={{
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          borderRadius: 8,
+          backgroundColor: COLORS.surface,
+        }}
+        onPress={handleUnmute}
+      >
+        <Text style={{ color: COLORS.white, fontWeight: "600" }}>
+          Unhide stories
+        </Text>
       </TouchableOpacity>
     </View>
   );
