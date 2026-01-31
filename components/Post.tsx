@@ -9,6 +9,7 @@ import { Link } from "expo-router";
 import { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import CommentsModal from "./CommentsModal";
+import PostMenu from "./PostMenu";
 import { formatDistanceToNow } from "date-fns";
 import { useUser } from "@clerk/clerk-expo";
 
@@ -35,6 +36,7 @@ export default function Post({ post }: PostProps) {
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
   const [showComments, setShowComments] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   const { user } = useUser();
   const currentUser = useQuery(
@@ -45,6 +47,7 @@ export default function Post({ post }: PostProps) {
   const toggleLike = useMutation(api.posts.toggleLike);
   const toggleBookmark = useMutation(api.bookmarks.toggleBookmark);
   const deletePost = useMutation(api.posts.deletePost);
+  const hideUser = useMutation(api.hiddenUsers.hideUser);
 
   const handleLike = async () => {
     try {
@@ -66,6 +69,15 @@ export default function Post({ post }: PostProps) {
       await deletePost({ postId: post._id });
     } catch (error) {
       console.error("Error deleting post:", error);
+    }
+  };
+
+  const handleHide = async () => {
+    try {
+      await hideUser({ hiddenUserId: post.author._id as Id<"users"> });
+      setShowMenu(false);
+    } catch (error) {
+      console.error("Error hiding user:", error);
     }
   };
   return (
@@ -99,7 +111,7 @@ export default function Post({ post }: PostProps) {
             <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => setShowMenu(true)}>
             <Ionicons
               name="ellipsis-horizontal"
               size={20}
@@ -157,6 +169,10 @@ export default function Post({ post }: PostProps) {
           <View style={styles.captionContainer}>
             <Text style={styles.captionUsername}>{post.author.username}</Text>
             <Text style={styles.captionText}>{post.caption}</Text>
+
+            <Text style={styles.timeAgo}>
+              {formatDistanceToNow(post._creationTime, { addSuffix: true })}
+            </Text>
           </View>
         )}
 
@@ -167,16 +183,18 @@ export default function Post({ post }: PostProps) {
             </Text>
           </TouchableOpacity>
         )}
-
-        <Text style={styles.timeAgo}>
-          {formatDistanceToNow(post._creationTime, { addSuffix: true })}
-        </Text>
       </View>
 
       <CommentsModal
         postId={post._id}
         visible={showComments}
         onClose={() => setShowComments(false)}
+      />
+
+      <PostMenu
+        visible={showMenu}
+        onClose={() => setShowMenu(false)}
+        onHide={handleHide}
       />
     </View>
   );

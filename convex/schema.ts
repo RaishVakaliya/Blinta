@@ -61,4 +61,11 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_post", ["postId"])
     .index("by_user_and_post", ["userId", "postId"]),
+
+  hiddenUsers: defineTable({
+    userId: v.id("users"),
+    hiddenUserId: v.id("users"),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_hidden_user", ["userId", "hiddenUserId"]),
 });

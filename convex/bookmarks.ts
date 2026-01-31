@@ -7,7 +7,6 @@ export const toggleBookmark = mutation({
   handler: async (ctx, args) => {
     const currentUser = await getAuthenticatedUser(ctx);
 
-    //get all bookmarks
     const existing = await ctx.db
       .query("bookmarks")
       .withIndex("by_user_and_post", (q) =>

@@ -30,7 +30,6 @@ export const createPost = mutation({
       comments: 0,
     });
 
-    //increment number of posts count by 1
     await ctx.db.patch(currentUser._id, {
       posts: currentUser.posts + 1,
     });
@@ -42,8 +41,17 @@ export const createPost = mutation({
 export const getFeedPosts = query({
   handler: async (ctx) => {
     const currentUser = await getAuthenticatedUser(ctx);
-    // get all posts
-    const posts = await ctx.db.query("posts").order("desc").collect();
+    const allPosts = await ctx.db.query("posts").order("desc").collect();
+    const hiddenUsers = await ctx.db
+      .query("hiddenUsers")
+      .withIndex("by_user", (q) => q.eq("userId", currentUser._id))
+      .collect();
+    const hiddenUserIds = hiddenUsers.map((h) => h.hiddenUserId);
+
+    const posts = allPosts.filter(
+      (post) =>
+        post.userId !== currentUser._id && !hiddenUserIds.includes(post.userId),
+    );
     if (posts.length === 0) return [];
 
     const postsWithInfo = await Promise.all(
