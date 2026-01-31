@@ -1,5 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
+import Post from "@/components/Post";
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery, useMutation } from "convex/react";
 import { useState } from "react";
@@ -38,7 +39,7 @@ export default function Profile() {
     bio: currentUser?.bio || "",
   });
 
-  const [selectedPost, setSelectedPost] = useState<Doc<"posts"> | null>(null);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
   const posts = useQuery(api.posts.getPostsByUser, {});
 
   const hiddenUserIds = useQuery(api.hiddenUsers.getHiddenUsers);
@@ -217,12 +218,10 @@ export default function Profile() {
                 </TouchableOpacity>
               </View>
 
-              {/* Selected Image */}
-              <Image
-                source={selectedPost.imageUrl}
-                cachePolicy={"memory-disk"}
-                style={styles.postDetailImage}
-              />
+              {/* Full Post Card */}
+              <ScrollView>
+                <Post post={selectedPost} />
+              </ScrollView>
             </View>
           )}
         </View>

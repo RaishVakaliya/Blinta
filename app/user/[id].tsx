@@ -2,6 +2,7 @@ import { Loader } from "@/components/Loader";
 import { COLORS } from "@/constants/theme";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import Post from "@/components/Post";
 import { styles } from "@/styles/profile.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
@@ -138,7 +139,7 @@ export default function UserProfileScreen() {
         </View>
       </ScrollView>
 
-      {/* Image View Modal */}
+      {/* Post Detail Modal */}
       <Modal
         visible={!!selectedPost}
         animationType="fade"
@@ -153,13 +154,9 @@ export default function UserProfileScreen() {
                   <Ionicons name="close" size={24} color={COLORS.white} />
                 </TouchableOpacity>
               </View>
-              <Image
-                source={{ uri: selectedPost.imageUrl }}
-                style={styles.postDetailImage}
-                contentFit="cover"
-                transition={200}
-                cachePolicy="memory-disk"
-              />
+              <ScrollView>
+                <Post post={selectedPost} />
+              </ScrollView>
             </View>
           )}
         </View>
