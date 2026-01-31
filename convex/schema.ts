@@ -68,4 +68,13 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_and_hidden_user", ["userId", "hiddenUserId"]),
+
+  stories: defineTable({
+    userId: v.id("users"),
+    imageUrl: v.string(),
+    storageId: v.id("_storage"),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_createdAt", ["createdAt"]),
 });
