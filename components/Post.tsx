@@ -26,6 +26,7 @@ type PostProps = {
     author: {
       _id: string;
       username: string;
+      fullname?: string;
       image: string;
     };
   };
@@ -101,7 +102,9 @@ export default function Post({ post }: PostProps) {
               transition={200}
               cachePolicy="memory-disk"
             />
-            <Text style={styles.postUsername}>{post.author.username}</Text>
+            <Text style={styles.postUsername}>
+              {post.author.fullname || post.author.username}
+            </Text>
           </TouchableOpacity>
         </Link>
 
