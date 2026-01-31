@@ -19,11 +19,13 @@ export default function Comment({ comment }: { comment: Comment }) {
         style={styles.commentAvatar}
       />
       <View style={styles.commentContent}>
-        <Text style={styles.commentUsername}>{comment.user.fullname}</Text>
+        <View style={styles.commentHeader}>
+          <Text style={styles.commentUsername}>{comment.user.fullname}</Text>
+          <Text style={styles.commentTime}>
+            {formatDistanceToNow(comment._creationTime, { addSuffix: true })}
+          </Text>
+        </View>
         <Text style={styles.commentText}>{comment.content}</Text>
-        <Text style={styles.commentTime}>
-          {formatDistanceToNow(comment._creationTime, { addSuffix: true })}
-        </Text>
       </View>
     </View>
   );

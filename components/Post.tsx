@@ -9,6 +9,7 @@ import { Link } from "expo-router";
 import { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import CommentsModal from "./CommentsModal";
+import LikesModal from "./LikesModal";
 import PostMenu from "./PostMenu";
 import { formatDistanceToNow } from "date-fns";
 import { useUser } from "@clerk/clerk-expo";
@@ -37,6 +38,7 @@ export default function Post({ post }: PostProps) {
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
   const [showComments, setShowComments] = useState(false);
+  const [showLikes, setShowLikes] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
   const { user } = useUser();
@@ -162,11 +164,16 @@ export default function Post({ post }: PostProps) {
 
       {/*POST INFO */}
       <View style={styles.postInfo}>
-        <Text style={styles.likesText}>
-          {post.likes > 0
-            ? `${post.likes.toLocaleString()} likes`
-            : "Be the first to like"}
-        </Text>
+        <TouchableOpacity
+          disabled={post.likes === 0}
+          onPress={() => setShowLikes(true)}
+        >
+          <Text style={styles.likesText}>
+            {post.likes > 0
+              ? `${post.likes.toLocaleString()} likes`
+              : "Be the first to like"}
+          </Text>
+        </TouchableOpacity>
 
         {post.caption && (
           <View style={styles.captionContainer}>
@@ -192,6 +199,12 @@ export default function Post({ post }: PostProps) {
         postId={post._id}
         visible={showComments}
         onClose={() => setShowComments(false)}
+      />
+
+      <LikesModal
+        postId={post._id}
+        visible={showLikes}
+        onClose={() => setShowLikes(false)}
       />
 
       <PostMenu
