@@ -1,9 +1,10 @@
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
-import Post from "@/components/Post";
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery, useMutation } from "convex/react";
 import { useState } from "react";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import {
   View,
   Text,
@@ -22,12 +23,14 @@ import { Modal } from "react-native";
 import { Keyboard } from "react-native";
 import { KeyboardAvoidingView } from "react-native";
 import { TextInput } from "react-native";
+import Post from "@/components/Post";
 
 export default function Profile() {
   const { signOut, userId } = useAuth();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isHiddenUsersModalVisible, setIsHiddenUsersModalVisible] =
     useState(false);
+  const [isUploadingStory, setIsUploadingStory] = useState(false);
 
   const currentUser = useQuery(
     api.users.getUserByClerkId,
@@ -45,10 +48,47 @@ export default function Profile() {
   const hiddenUserIds = useQuery(api.hiddenUsers.getHiddenUsers);
 
   const updateProfile = useMutation(api.users.updateProfile);
+  const generateStoryUploadUrl = useMutation(api.stories.generateUploadUrl);
+  const createStory = useMutation(api.stories.createStory);
 
   const handleSaveProfile = async () => {
     await updateProfile(editedProfile);
     setIsEditModalVisible(false);
+  };
+
+  const handleAddStory = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [9, 16],
+        quality: 0.8,
+      });
+
+      if (result.canceled) return;
+
+      setIsUploadingStory(true);
+
+      const uploadUrl = await generateStoryUploadUrl();
+      const uploadResult = await FileSystem.uploadAsync(
+        uploadUrl,
+        result.assets[0].uri,
+        {
+          httpMethod: "POST",
+          uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+          mimeType: "image/jpeg",
+        },
+      );
+
+      if (uploadResult.status !== 200) throw new Error("Upload failed");
+
+      const { storageId } = JSON.parse(uploadResult.body);
+      await createStory({ storageId });
+    } catch (error) {
+      console.error("Error uploading story:", error);
+    } finally {
+      setIsUploadingStory(false);
+    }
   };
 
   if (!currentUser || posts === undefined) return <Loader />;
@@ -71,14 +111,21 @@ export default function Profile() {
         <View style={styles.profileInfo}>
           {/* AVATAR & STATS */}
           <View style={styles.avatarAndStats}>
-            <View style={styles.avatarContainer}>
-              <Image
-                source={currentUser.image}
-                style={styles.avatar}
-                contentFit="cover"
-                transition={200}
-              />
-            </View>
+            <Image
+              source={currentUser.image}
+              style={styles.avatar}
+              contentFit="cover"
+              transition={200}
+            />
+            <TouchableOpacity
+              style={styles.avatarContainer}
+              onPress={handleAddStory}
+              disabled={isUploadingStory}
+            >
+              <View style={styles.storyPlusBadge}>
+                <Ionicons name="add-circle" size={22} color="#000" />
+              </View>
+            </TouchableOpacity>
 
             <View style={styles.statsContainer}>
               <View style={styles.statItem}>
