@@ -6,8 +6,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { useRef, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from "react-native";
 import CommentsModal from "./CommentsModal";
 import LikesModal from "./LikesModal";
 import PostMenu from "./PostMenu";
@@ -41,6 +46,8 @@ export default function Post({ post }: PostProps) {
   const [showLikes, setShowLikes] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
+  const lastTapRef = useRef<number | null>(null);
+
   const { user } = useUser();
   const currentUser = useQuery(
     api.users.getUserByClerkId,
@@ -59,6 +66,26 @@ export default function Post({ post }: PostProps) {
       setIsLiked(newIsLiked);
     } catch (error) {
       console.error("Error toggling like:", error);
+    }
+  };
+
+  const handleDoubleTapLike = async () => {
+    if (isLiked) return;
+    try {
+      const newIsLiked = await toggleLike({ postId: post._id });
+      setIsLiked(newIsLiked);
+    } catch (error) {
+      console.error("Error liking post on double-tap:", error);
+    }
+  };
+
+  const handleImageTap = () => {
+    const now = Date.now();
+    if (lastTapRef.current && now - lastTapRef.current < 300) {
+      lastTapRef.current = null;
+      handleDoubleTapLike();
+    } else {
+      lastTapRef.current = now;
     }
   };
 
@@ -123,13 +150,15 @@ export default function Post({ post }: PostProps) {
       </View>
 
       {/*IMAGE */}
-      <Image
-        source={post.imageUrl}
-        style={styles.postImage}
-        contentFit="cover"
-        transition={200}
-        cachePolicy="memory-disk"
-      />
+      <TouchableWithoutFeedback onPress={handleImageTap}>
+        <Image
+          source={post.imageUrl}
+          style={styles.postImage}
+          contentFit="cover"
+          transition={200}
+          cachePolicy="memory-disk"
+        />
+      </TouchableWithoutFeedback>
 
       {/*POST ACTIONS */}
       <View style={styles.postActions}>
