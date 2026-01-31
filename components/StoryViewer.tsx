@@ -1,10 +1,19 @@
-import { View, Modal, TouchableOpacity, TouchableWithoutFeedback, Text } from "react-native";
+import {
+  View,
+  Modal,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Text,
+} from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { COLORS } from "@/constants/theme";
 import { styles as feedStyles } from "@/styles/feed.styles";
 import type { StoryData } from "./Stories";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface StoryViewerProps {
   visible: boolean;
@@ -12,8 +21,19 @@ interface StoryViewerProps {
   onClose: () => void;
 }
 
-export default function StoryViewer({ visible, story, onClose }: StoryViewerProps) {
+export default function StoryViewer({
+  visible,
+  story,
+  onClose,
+}: StoryViewerProps) {
   const [showMenu, setShowMenu] = useState(false);
+
+  const mutedUsers = useQuery(api.stories.getMutedUsers);
+  const toggleMuteUser = useMutation(api.stories.toggleMuteUser);
+
+  const isMuted =
+    !!story &&
+    (mutedUsers ?? []).some((id) => id === (story.userId as Id<"users">));
 
   useEffect(() => {
     if (!visible || !story) return;
@@ -21,12 +41,23 @@ export default function StoryViewer({ visible, story, onClose }: StoryViewerProp
     setShowMenu(false);
     const timer = setTimeout(() => {
       onClose();
-    }, 14000); // 14 seconds
+      // 14 seconds
+    }, 14000);
 
     return () => clearTimeout(timer);
   }, [visible, story, onClose]);
 
   if (!story) return null;
+
+  const handleToggleMute = async () => {
+    if (!story) return;
+    try {
+      await toggleMuteUser({ mutedUserId: story.userId as Id<"users"> });
+      setShowMenu(false);
+    } catch (err) {
+      console.error("Error toggling story mute:", err);
+    }
+  };
 
   return (
     <Modal
@@ -58,14 +89,24 @@ export default function StoryViewer({ visible, story, onClose }: StoryViewerProp
                 >
                   {story.username}
                 </Text>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
-                  <TouchableOpacity onPress={() => setShowMenu((prev) => !prev)}>
-                    <Ionicons
-                      name="ellipsis-vertical"
-                      size={22}
-                      color={COLORS.white}
-                    />
-                  </TouchableOpacity>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 16,
+                  }}
+                >
+                  {!story.isCurrentUser && (
+                    <TouchableOpacity
+                      onPress={() => setShowMenu((prev) => !prev)}
+                    >
+                      <Ionicons
+                        name="ellipsis-vertical"
+                        size={22}
+                        color={COLORS.white}
+                      />
+                    </TouchableOpacity>
+                  )}
                   <TouchableOpacity onPress={onClose}>
                     <Ionicons name="close" size={24} color={COLORS.white} />
                   </TouchableOpacity>
@@ -87,7 +128,7 @@ export default function StoryViewer({ visible, story, onClose }: StoryViewerProp
                 <View
                   style={{
                     position: "absolute",
-                    top: 70,
+                    top: 85,
                     right: 16,
                     backgroundColor: COLORS.surface,
                     paddingVertical: 8,
@@ -95,14 +136,11 @@ export default function StoryViewer({ visible, story, onClose }: StoryViewerProp
                     borderRadius: 8,
                   }}
                 >
-                  <TouchableOpacity
-                    onPress={() => {
-                      // Placeholder for future backend: hide story from this user
-                      setShowMenu(false);
-                    }}
-                  >
+                  <TouchableOpacity onPress={handleToggleMute}>
                     <Text style={{ color: COLORS.white }}>
-                      Hide story from this user
+                      {isMuted
+                        ? "Unhide stories from this user"
+                        : "Hide stories from this user"}
                     </Text>
                   </TouchableOpacity>
                 </View>

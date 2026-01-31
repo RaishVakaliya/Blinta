@@ -70,13 +70,16 @@ export default function CommentsModal({
 
         {/* Comments List */}
         {comments === undefined ? (
-          <Loader />
+          <View style={[styles.centered, { flex: 1 }]}>
+            <Loader />
+          </View>
         ) : (
           <FlatList
             data={comments}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => <Comment comment={item} />}
-            contentContainerStyle={styles.commentsList}
+            style={styles.commentsList}
+            contentContainerStyle={{ paddingBottom: 16 }}
           />
         )}
 
@@ -99,7 +102,7 @@ export default function CommentsModal({
                 !newComment.trim() && styles.postButtonDisabled,
               ]}
             >
-              Post
+              <Ionicons name="send" size={16} color={COLORS.white} />
             </Text>
           </TouchableOpacity>
         </View>

@@ -114,7 +114,8 @@ export default function LikesModal({ postId, visible, onClose }: LikesModalProps
                 )}
               </View>
             )}
-            contentContainerStyle={styles.commentsList}
+            style={styles.commentsList}
+            contentContainerStyle={{ paddingBottom: 16 }}
           />
         )}
       </View>
