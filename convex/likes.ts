@@ -34,6 +34,7 @@ export const getPostLikes = query({
         image: user.image,
         bio: user.bio,
         isFollowing: followingSet.has(user._id),
+        isCurrentUser: user._id === currentUser._id,
       }));
   },
 });

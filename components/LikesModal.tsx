@@ -26,6 +26,8 @@ export default function LikesModal({ postId, visible, onClose }: LikesModalProps
     }
   };
 
+  const likesCount = likes?.length ?? 0;
+
   return (
     <Modal
       visible={visible}
@@ -42,6 +44,19 @@ export default function LikesModal({ postId, visible, onClose }: LikesModalProps
           <Text style={styles.modalTitle}>Likes</Text>
           <View style={{ width: 24 }} />
         </View>
+
+        {likes !== undefined && (
+          <View
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+            }}
+          >
+            <Text style={{ color: COLORS.white, fontSize: 14 }}>
+              {likesCount.toLocaleString()} likes
+            </Text>
+          </View>
+        )}
 
         {likes === undefined ? (
           <View style={[styles.centered, { flex: 1 }]}>
@@ -74,27 +89,29 @@ export default function LikesModal({ postId, visible, onClose }: LikesModalProps
                     </Text>
                   )}
                 </View>
-                <TouchableOpacity
-                  style={{
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 16,
-                    backgroundColor: item.isFollowing
-                      ? COLORS.surface
-                      : COLORS.primary,
-                  }}
-                  onPress={() => handleToggleFollow(item._id as Id<"users">)}
-                >
-                  <Text
+                {!item.isCurrentUser && (
+                  <TouchableOpacity
                     style={{
-                      color: COLORS.white,
-                      fontWeight: "600",
-                      fontSize: 13,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      borderRadius: 16,
+                      backgroundColor: item.isFollowing
+                        ? COLORS.surface
+                        : COLORS.primary,
                     }}
+                    onPress={() => handleToggleFollow(item._id as Id<"users">)}
                   >
-                    {item.isFollowing ? "Following" : "Follow"}
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      style={{
+                        color: COLORS.white,
+                        fontWeight: "600",
+                        fontSize: 13,
+                      }}
+                    >
+                      {item.isFollowing ? "Following" : "Follow"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
             contentContainerStyle={styles.commentsList}

@@ -161,15 +161,21 @@ export const styles = StyleSheet.create({
   },
   commentContainer: {
     flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 0.5,
     borderBottomColor: COLORS.surface,
   },
+  commentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 3,
+  },
   commentAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     marginRight: 12,
   },
   commentContent: {
@@ -178,7 +184,6 @@ export const styles = StyleSheet.create({
   commentUsername: {
     color: COLORS.white,
     fontWeight: "500",
-    marginBottom: 4,
   },
   commentText: {
     color: COLORS.white,
@@ -188,7 +193,7 @@ export const styles = StyleSheet.create({
   commentTime: {
     color: COLORS.grey,
     fontSize: 12,
-    marginTop: 4,
+    marginLeft: 10,
   },
   commentInput: {
     flexDirection: "row",

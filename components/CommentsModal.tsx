@@ -60,7 +60,11 @@ export default function CommentsModal({
           <TouchableOpacity onPress={onClose}>
             <Ionicons name="close" size={24} color={COLORS.white} />
           </TouchableOpacity>
-          <Text style={styles.modalTitle}>Comments</Text>
+          <Text style={styles.modalTitle}>
+            {comments === undefined
+              ? "Comments"
+              : `Comments (${comments.length})`}
+          </Text>
           <View style={{ width: 24 }} />
         </View>
 
