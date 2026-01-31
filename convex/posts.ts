@@ -76,6 +76,7 @@ export const getFeedPosts = query({
           author: {
             _id: postAuthor?._id,
             username: postAuthor?.username,
+            fullname: postAuthor?.fullname,
             image: postAuthor?.image,
           },
           isLiked: !!like,
@@ -150,7 +151,6 @@ export const deletePost = mutation({
       await ctx.db.delete(like._id);
     }
 
-    // delete associated comments
     const comments = await ctx.db
       .query("comments")
       .withIndex("by_post", (q) => q.eq("postId", args.postId))
@@ -160,7 +160,6 @@ export const deletePost = mutation({
       await ctx.db.delete(comment._id);
     }
 
-    // delete associated bookmarks
     const bookmarks = await ctx.db
       .query("bookmarks")
       .withIndex("by_post", (q) => q.eq("postId", args.postId))
