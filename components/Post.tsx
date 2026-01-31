@@ -117,11 +117,7 @@ export default function Post({ post }: PostProps) {
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => setShowMenu(true)}>
-            <Ionicons
-              name="ellipsis-horizontal"
-              size={20}
-              color={COLORS.white}
-            />
+            <Ionicons name="ellipsis-vertical" size={20} color={COLORS.white} />
           </TouchableOpacity>
         )}
       </View>
