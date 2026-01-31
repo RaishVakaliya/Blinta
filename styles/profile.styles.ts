@@ -51,6 +51,16 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.surface,
   },
+  storyPlusBadge: {
+    position: "absolute",
+    bottom: -42,
+    right: 5,
+    borderRadius: 15,
+    backgroundColor: "#fff",
+    borderWidth: 2,
+    borderStyle: "solid",
+    borderColor: "#000",
+  },
   statsContainer: {
     flex: 1,
     flexDirection: "row",
