@@ -1,5 +1,5 @@
 import { api } from "@/convex/_generated/api";
-import { Doc } from "@/convex/_generated/dataModel";
+import { Doc, Id } from "@/convex/_generated/dataModel";
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery, useMutation } from "convex/react";
 import { useState } from "react";
@@ -25,6 +25,8 @@ import { TextInput } from "react-native";
 export default function Profile() {
   const { signOut, userId } = useAuth();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isHiddenUsersModalVisible, setIsHiddenUsersModalVisible] =
+    useState(false);
 
   const currentUser = useQuery(
     api.users.getUserByClerkId,
@@ -38,6 +40,8 @@ export default function Profile() {
 
   const [selectedPost, setSelectedPost] = useState<Doc<"posts"> | null>(null);
   const posts = useQuery(api.posts.getPostsByUser, {});
+
+  const hiddenUserIds = useQuery(api.hiddenUsers.getHiddenUsers);
 
   const updateProfile = useMutation(api.users.updateProfile);
 
@@ -106,8 +110,11 @@ export default function Profile() {
               <Text style={styles.editButtonText}>Edit Profile</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.shareButton}>
-              <Ionicons name="share-outline" size={20} color={COLORS.white} />
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => setIsHiddenUsersModalVisible(true)}
+            >
+              <Text style={styles.editButtonText}>Hidden Users</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -220,6 +227,102 @@ export default function Profile() {
           )}
         </View>
       </Modal>
+
+      {/* HIDDEN USERS MODAL */}
+      <Modal
+        visible={isHiddenUsersModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsHiddenUsersModalVisible(false)}
+      >
+        <TouchableWithoutFeedback>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Hidden Accounts</Text>
+                <TouchableOpacity
+                  onPress={() => setIsHiddenUsersModalVisible(false)}
+                >
+                  <Ionicons name="close" size={24} color={COLORS.white} />
+                </TouchableOpacity>
+              </View>
+
+              {hiddenUserIds === undefined ? (
+                <View style={styles.centered}>
+                  <Loader />
+                </View>
+              ) : hiddenUserIds.length === 0 ? (
+                <View style={styles.centered}>
+                  <Text style={{ color: COLORS.grey }}>
+                    You haven&apos;t hidden any accounts.
+                  </Text>
+                </View>
+              ) : (
+                <ScrollView>
+                  {hiddenUserIds.map((userId) => (
+                    <HiddenUserItem
+                      key={userId}
+                      userId={userId as Id<"users">}
+                    />
+                  ))}
+                </ScrollView>
+              )}
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </View>
+  );
+}
+
+function HiddenUserItem({ userId }: { userId: Id<"users"> }) {
+  const user = useQuery(api.users.getUserProfile, { id: userId });
+  const hideUser = useMutation(api.hiddenUsers.hideUser);
+
+  if (user === undefined) {
+    return null;
+  }
+
+  const handleUnhide = async () => {
+    try {
+      await hideUser({ hiddenUserId: userId });
+    } catch (error) {
+      console.error("Error unhiding user:", error);
+    }
+  };
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 8,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <Image
+          source={user.image}
+          style={{ width: 40, height: 40, borderRadius: 20 }}
+          contentFit="cover"
+          transition={200}
+        />
+        <View>
+          <Text style={styles.name}>{user.fullname}</Text>
+          <Text style={{ color: COLORS.grey }}>@{user.username}</Text>
+        </View>
+      </View>
+      <TouchableOpacity
+        style={{
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          borderRadius: 8,
+          backgroundColor: COLORS.surface,
+        }}
+        onPress={handleUnhide}
+      >
+        <Text style={{ color: COLORS.white, fontWeight: "600" }}>Unhide</Text>
+      </TouchableOpacity>
     </View>
   );
 }
