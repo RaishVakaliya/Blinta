@@ -45,6 +45,9 @@ export const styles = StyleSheet.create({
   noStory: {
     borderColor: COLORS.grey,
   },
+  storySeen: {
+    borderColor: COLORS.surface,
+  },
   storyAvatar: {
     width: 60,
     height: 60,
