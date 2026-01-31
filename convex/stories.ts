@@ -66,6 +66,9 @@ export const getStories = query({
 
         return {
           _id: story._id,
+          userId: user._id,
+          imageUrl: story.imageUrl,
+          createdAt: story.createdAt,
           username: isCurrentUser ? "You" : user.username,
           avatar: user.image,
           hasStory: true,
