@@ -12,15 +12,6 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: height * 0.1,
   },
-  logoContainer: {
-    // width: 60,
-    // height: 60,
-    // borderRadius: 18,
-    // backgroundColor: "rgba(74, 222, 128, 0.15)",
-    // justifyContent: "center",
-    // alignItems: "center",
-    // marginBottom: 20,
-  },
   logoImage: {
     width: 100,
     height: 100,
@@ -37,12 +28,10 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.grey,
     letterSpacing: 1,
-    // textTransform: "lowercase",
   },
   illustrationContainer: {
     flex: 1,
     paddingTop: 60,
-    // justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 40,
   },

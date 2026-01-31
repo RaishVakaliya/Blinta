@@ -106,6 +106,11 @@ export const styles = StyleSheet.create({
     color: COLORS.white,
     marginBottom: 6,
   },
+  likesRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   captionContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
