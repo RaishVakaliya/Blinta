@@ -1,8 +1,17 @@
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { Tabs } from "expo-router";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
+import { useAuth } from "@clerk/clerk-expo";
 
 export default function TabLayout() {
+  const { userId } = useAuth();
+  const currentUser = useQuery(
+    api.users.getUserByClerkId,
+    userId ? { clerkId: userId } : "skip",
+  );
   return (
     <Tabs
       screenOptions={{
@@ -56,7 +65,15 @@ export default function TabLayout() {
         name="profile"
         options={{
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="person-circle" size={size} color={color} />
+            <Image
+              source={currentUser?.image}
+              style={{
+                width: 24,
+                height: 24,
+                marginLeft: 10,
+                borderRadius: 12,
+              }}
+            />
           ),
         }}
       />
