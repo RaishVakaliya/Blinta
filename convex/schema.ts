@@ -77,4 +77,19 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_createdAt", ["createdAt"]),
+
+  mutedStories: defineTable({
+    userId: v.id("users"),
+    mutedUserId: v.id("users"),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_muted_user", ["userId", "mutedUserId"]),
+
+  storyViews: defineTable({
+    storyId: v.id("stories"),
+    viewerId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_story", ["storyId"])
+    .index("by_viewer_and_story", ["viewerId", "storyId"]),
 });

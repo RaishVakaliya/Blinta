@@ -53,8 +53,8 @@ export const styles = StyleSheet.create({
   },
   storyPlusBadge: {
     position: "absolute",
-    bottom: -42,
-    right: 5,
+    bottom: 0,
+    right: 0,
     borderRadius: 15,
     backgroundColor: "#fff",
     borderWidth: 2,

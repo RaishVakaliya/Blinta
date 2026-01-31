@@ -39,15 +39,32 @@ export const getStories = query({
 
     const stories = await ctx.db
       .query("stories")
-      .withIndex("by_createdAt", (q) => q.gte("createdAt", cutoff))
+.withIndex("by_createdAt", (q) => q.gte("createdAt", cutoff))
       .order("desc")
       .collect();
 
     if (stories.length === 0) return [];
 
-    // Keep the latest story per user
-    const latestByUser = new Map<Id<"users">, (typeof stories)[number]>();
-    for (const story of stories) {
+    // Fetch muted story users for current user
+    const muted = await ctx.db
+      .query("mutedStories")
+      .withIndex("by_user", (q) => q.eq("userId", currentUser._id))
+      .collect();
+
+    const mutedIds = new Set(muted.map((m) => m.mutedUserId));
+
+    const visibleStories = stories.filter(
+      (story) => !mutedIds.has(story.userId),
+    );
+
+    if (visibleStories.length === 0) return [];
+
+    // Keep the latest visible story per user
+    const latestByUser = new Map<
+      Id<"users">,
+      (typeof visibleStories)[number]
+    >();
+    for (const story of visibleStories) {
       if (!latestByUser.has(story.userId)) {
         latestByUser.set(story.userId, story);
       }
@@ -84,5 +101,100 @@ export const getStories = query({
     });
 
     return result;
+  },
+});
+
+export const toggleMuteUser = mutation({
+  args: { mutedUserId: v.id("users") },
+  handler: async (ctx, args) => {
+    const currentUser = await getAuthenticatedUser(ctx);
+
+    const existing = await ctx.db
+      .query("mutedStories")
+      .withIndex("by_user_and_muted_user", (q) =>
+        q.eq("userId", currentUser._id).eq("mutedUserId", args.mutedUserId),
+      )
+      .first();
+
+    if (existing) {
+      await ctx.db.delete(existing._id);
+      return false;
+    } else {
+      await ctx.db.insert("mutedStories", {
+        userId: currentUser._id,
+        mutedUserId: args.mutedUserId,
+      });
+      return true;
+    }
+  },
+});
+
+export const getMutedUsers = query({
+  handler: async (ctx) => {
+    const currentUser = await getAuthenticatedUser(ctx);
+
+    const muted = await ctx.db
+      .query("mutedStories")
+      .withIndex("by_user", (q) => q.eq("userId", currentUser._id))
+      .collect();
+
+    return muted.map((m) => m.mutedUserId);
+  },
+});
+
+export const viewStory = mutation({
+  args: { storyId: v.id("stories") },
+  handler: async (ctx, args) => {
+    const currentUser = await getAuthenticatedUser(ctx);
+
+    const story = await ctx.db.get(args.storyId);
+    if (!story) throw new Error("Story not found");
+
+    // Do not record self-views
+    if (story.userId === currentUser._id) return;
+
+    const existing = await ctx.db
+      .query("storyViews")
+      .withIndex("by_viewer_and_story", (q) =>
+        q.eq("viewerId", currentUser._id).eq("storyId", args.storyId),
+      )
+      .first();
+
+    if (!existing) {
+      await ctx.db.insert("storyViews", {
+        storyId: args.storyId,
+        viewerId: currentUser._id,
+        createdAt: Date.now(),
+      });
+    }
+  },
+});
+
+export const getStoryViews = query({
+  args: { storyId: v.id("stories") },
+  handler: async (ctx, args) => {
+    const views = await ctx.db
+      .query("storyViews")
+      .withIndex("by_story", (q) => q.eq("storyId", args.storyId))
+      .collect();
+
+    if (views.length === 0) {
+      return { count: 0, viewers: [] as any[] };
+    }
+
+    const viewerDocs = await Promise.all(
+      views.map((v) => ctx.db.get(v.viewerId)),
+    );
+
+    const viewers = viewerDocs
+      .filter((u): u is NonNullable<typeof u> => !!u)
+      .map((user) => ({
+        _id: user._id,
+        username: user.username,
+        fullname: user.fullname,
+        image: user.image,
+      }));
+
+    return { count: viewers.length, viewers };
   },
 });
