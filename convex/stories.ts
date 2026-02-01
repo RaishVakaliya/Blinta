@@ -39,7 +39,7 @@ export const getStories = query({
 
     const stories = await ctx.db
       .query("stories")
-.withIndex("by_createdAt", (q) => q.gte("createdAt", cutoff))
+      .withIndex("by_createdAt", (q) => q.gte("createdAt", cutoff))
       .order("desc")
       .collect();
 
@@ -59,24 +59,21 @@ export const getStories = query({
 
     if (visibleStories.length === 0) return [];
 
-    // Keep the latest visible story per user
-    const latestByUser = new Map<
-      Id<"users">,
-      (typeof visibleStories)[number]
-    >();
-    for (const story of visibleStories) {
-      if (!latestByUser.has(story.userId)) {
-        latestByUser.set(story.userId, story);
-      }
-    }
+    // Fetch user docs for all story authors
+    const uniqueUserIds = Array.from(
+      new Set(visibleStories.map((s) => s.userId)),
+    );
+    const userDocs = await Promise.all(
+      uniqueUserIds.map((id) => ctx.db.get(id)),
+    );
+    const userMap = new Map<Id<"users">, (typeof userDocs)[number]>();
+    uniqueUserIds.forEach((id, idx) => {
+      userMap.set(id, userDocs[idx]);
+    });
 
-    const userIds = Array.from(latestByUser.keys());
-    const users = await Promise.all(userIds.map((id) => ctx.db.get(id)));
-
-    const result = userIds
-      .map((userId, index) => {
-        const user = users[index];
-        const story = latestByUser.get(userId)!;
+    const result = visibleStories
+      .map((story) => {
+        const user = userMap.get(story.userId);
         if (!user) return null;
 
         const isCurrentUser = user._id === currentUser._id;
@@ -94,10 +91,12 @@ export const getStories = query({
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
 
-    // Sort so current user's story ("You") appears first
+    // Sort so current user's stories appear first, then by newest
     result.sort((a, b) => {
-      if (a.isCurrentUser === b.isCurrentUser) return 0;
-      return a.isCurrentUser ? -1 : 1;
+      if (a.isCurrentUser !== b.isCurrentUser) {
+        return a.isCurrentUser ? -1 : 1;
+      }
+      return b.createdAt - a.createdAt;
     });
 
     return result;
@@ -167,6 +166,21 @@ export const viewStory = mutation({
         createdAt: Date.now(),
       });
     }
+  },
+});
+
+export const getUserStories = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const stories = await ctx.db
+      .query("stories")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    return stories
+      .filter((s) => s.createdAt >= cutoff)
+      .sort((a, b) => a.createdAt - b.createdAt);
   },
 });
 
