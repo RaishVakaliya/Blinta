@@ -1,5 +1,5 @@
 import { api } from "@/convex/_generated/api";
-import { Doc, Id } from "@/convex/_generated/dataModel";
+import { Id } from "@/convex/_generated/dataModel";
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery, useMutation } from "convex/react";
 import { useState } from "react";
@@ -189,7 +189,7 @@ export default function Profile() {
           data={posts}
           numColumns={3}
           scrollEnabled={false}
-          //keyExtractor={(item) => item._id}
+          // keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.gridItem}

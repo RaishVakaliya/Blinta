@@ -23,7 +23,6 @@ export default function Bookmarks() {
       </View>
 
       {/* POSTS */}
-
       <ScrollView
         contentContainerStyle={{
           padding: 8,
@@ -61,7 +60,6 @@ export default function Bookmarks() {
         <View style={styles.modalBackdrop}>
           {selectedPost && (
             <View style={styles.postDetailContainer}>
-              {/* Modal Header with Close Button */}
               <View style={styles.postDetailHeader}>
                 <TouchableOpacity onPress={() => setSelectedPost(null)}>
                   <Ionicons name="close" size={24} color={COLORS.white} />

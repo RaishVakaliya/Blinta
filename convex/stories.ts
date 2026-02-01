@@ -3,7 +3,6 @@ import { mutation, query } from "./_generated/server";
 import { getAuthenticatedUser } from "./users";
 import { Id } from "./_generated/dataModel";
 
-// Generate upload URL for story images
 export const generateUploadUrl = mutation(async (ctx) => {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("Unauthorized");
@@ -11,7 +10,6 @@ export const generateUploadUrl = mutation(async (ctx) => {
   return await ctx.storage.generateUploadUrl();
 });
 
-// Create a new story for the current user
 export const createStory = mutation({
   args: {
     storageId: v.id("_storage"),
@@ -35,7 +33,7 @@ export const createStory = mutation({
 export const getStories = query({
   handler: async (ctx) => {
     const currentUser = await getAuthenticatedUser(ctx);
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000; // 24h
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
 
     const stories = await ctx.db
       .query("stories")
@@ -45,7 +43,6 @@ export const getStories = query({
 
     if (stories.length === 0) return [];
 
-    // Fetch muted story users for current user
     const muted = await ctx.db
       .query("mutedStories")
       .withIndex("by_user", (q) => q.eq("userId", currentUser._id))
@@ -60,7 +57,10 @@ export const getStories = query({
     if (visibleStories.length === 0) return [];
 
     // Group by user: pick the latest story per user (one avatar per user)
-    const latestByUser = new Map<Id<"users">, (typeof visibleStories)[number]>();
+    const latestByUser = new Map<
+      Id<"users">,
+      (typeof visibleStories)[number]
+    >();
     for (const story of visibleStories) {
       if (!latestByUser.has(story.userId)) {
         latestByUser.set(story.userId, story);

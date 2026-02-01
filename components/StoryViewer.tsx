@@ -80,22 +80,31 @@ export default function StoryViewer({
   useEffect(() => {
     if (!visible || !story || segments.length === 0 || !activeStory) return;
 
+    // For other users, always start from the first story (index 0)
+    if (!story.isCurrentUser) {
+      setCurrentIndex(0);
+      return;
+    }
+
+    // For current user's own stories, start from the first unviewed story if any
     const viewedSet = new Set(
       (viewedStoryIds ?? []) as readonly (string | Id<"stories">)[],
     );
 
-    // start from first unviewed story if any, else first story
     const firstUnviewedIndex = segments.findIndex(
       (s) => !viewedSet.has(s._id as any),
     );
 
-    const initialIndex =
-      firstUnviewedIndex >= 0
-        ? firstUnviewedIndex
-        : segments.findIndex((s) => s._id === story._id);
+    const initialIndex = firstUnviewedIndex >= 0 ? firstUnviewedIndex : 0;
 
-    setCurrentIndex(initialIndex >= 0 ? initialIndex : 0);
-  }, [visible, story?._id, userStories?.length, viewedStoryIds?.length]);
+    setCurrentIndex(initialIndex);
+  }, [
+    visible,
+    story?._id,
+    story?.isCurrentUser,
+    userStories?.length,
+    viewedStoryIds?.length,
+  ]);
 
   useEffect(() => {
     if (!visible || !story || segments.length === 0 || !activeStory) return;

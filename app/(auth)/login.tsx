@@ -1,7 +1,5 @@
-import { COLORS } from "@/constants/theme";
 import { styles } from "@/styles/auth.styles";
 import { useSSO } from "@clerk/clerk-expo";
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 

@@ -3,7 +3,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef } from "react";
 import { Animated, Text } from "react-native";
 
-const AnimatedGradientText = ({ text, textStyle }) => {
+type AnimatedGradientTextProps = {
+  text: string;
+  textStyle?: object;
+};
+
+const AnimatedGradientText = ({
+  text,
+  textStyle,
+}: AnimatedGradientTextProps) => {
   const animation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
