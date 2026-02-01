@@ -24,6 +24,8 @@ import { Keyboard } from "react-native";
 import { KeyboardAvoidingView } from "react-native";
 import { TextInput } from "react-native";
 import Post from "@/components/Post";
+import StoryViewer from "@/components/StoryViewer";
+import type { StoryData } from "@/components/Stories";
 
 export default function Profile() {
   const { signOut, userId } = useAuth();
@@ -43,10 +45,12 @@ export default function Profile() {
   });
 
   const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [selectedStory, setSelectedStory] = useState<StoryData | null>(null);
   const posts = useQuery(api.posts.getPostsByUser, {});
 
   const hiddenUserIds = useQuery(api.hiddenUsers.getHiddenUsers);
   const mutedStoryUserIds = useQuery(api.stories.getMutedUsers);
+  const stories = useQuery(api.stories.getStories) as StoryData[] | undefined;
 
   const updateProfile = useMutation(api.users.updateProfile);
   const generateStoryUploadUrl = useMutation(api.stories.generateUploadUrl);
@@ -94,6 +98,14 @@ export default function Profile() {
 
   if (!currentUser || posts === undefined) return <Loader />;
 
+  const myStory = (stories ?? []).find(
+    (s) => s.isCurrentUser && s.userId === currentUser._id,
+  );
+
+  const handleOpenMyStory = () => {
+    if (myStory) setSelectedStory(myStory);
+  };
+
   return (
     <View style={styles.container}>
       {/* HEADER */}
@@ -113,12 +125,14 @@ export default function Profile() {
           {/* AVATAR & STATS */}
           <View style={styles.avatarAndStats}>
             <View style={styles.avatarContainer}>
-              <Image
-                source={currentUser.image}
-                style={styles.avatar}
-                contentFit="cover"
-                transition={200}
-              />
+              <TouchableOpacity onPress={handleOpenMyStory} disabled={!myStory}>
+                <Image
+                  source={currentUser.image}
+                  style={styles.avatar}
+                  contentFit="cover"
+                  transition={200}
+                />
+              </TouchableOpacity>
               <TouchableOpacity
                 style={styles.storyPlusBadge}
                 onPress={handleAddStory}
@@ -354,6 +368,13 @@ export default function Profile() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+
+      {/* STORY VIEWER FROM PROFILE AVATAR */}
+      <StoryViewer
+        visible={!!selectedStory}
+        story={selectedStory}
+        onClose={() => setSelectedStory(null)}
+      />
     </View>
   );
 }
