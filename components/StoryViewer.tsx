@@ -46,6 +46,9 @@ export default function StoryViewer({
         }[];
       }
     | undefined;
+  const viewedStoryIds = useQuery(api.stories.getViewedStoryIds) as
+    | Id<"stories">[]
+    | undefined;
 
   const userStories = useQuery(
     api.stories.getUserStories,
@@ -77,10 +80,22 @@ export default function StoryViewer({
   useEffect(() => {
     if (!visible || !story || segments.length === 0 || !activeStory) return;
 
-    // initialise index when stories change
-    const initialIndex = segments.findIndex((s) => s._id === story._id);
+    const viewedSet = new Set(
+      (viewedStoryIds ?? []) as readonly (string | Id<"stories">)[],
+    );
+
+    // start from first unviewed story if any, else first story
+    const firstUnviewedIndex = segments.findIndex(
+      (s) => !viewedSet.has(s._id as any),
+    );
+
+    const initialIndex =
+      firstUnviewedIndex >= 0
+        ? firstUnviewedIndex
+        : segments.findIndex((s) => s._id === story._id);
+
     setCurrentIndex(initialIndex >= 0 ? initialIndex : 0);
-  }, [visible, story?._id, userStories?.length]);
+  }, [visible, story?._id, userStories?.length, viewedStoryIds?.length]);
 
   useEffect(() => {
     if (!visible || !story || segments.length === 0 || !activeStory) return;
@@ -164,7 +179,11 @@ export default function StoryViewer({
                   {segments.map((seg, index) => {
                     const isCurrent = index === currentIndex;
                     const isPast = index < currentIndex;
-                    const width = isPast
+                    const wasViewed = (viewedStoryIds ?? []).some(
+                      (id) => id === (seg._id as Id<"stories">),
+                    );
+                    const isFilled = isPast || wasViewed;
+                    const width = isFilled
                       ? "100%"
                       : isCurrent
                         ? (progress as any).interpolate({
@@ -262,21 +281,31 @@ export default function StoryViewer({
               </View>
 
               {/* Story content */}
-              <View style={{ flex: 1, justifyContent: "center" }}>
-                <Image
-                  source={activeStory.imageUrl}
-                  style={{ width: "100%", height: "80%" }}
-                  contentFit="cover"
-                  transition={200}
-                  cachePolicy="memory-disk"
-                />
-              </View>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  if (currentIndex < segments.length - 1) {
+                    setCurrentIndex((idx) => idx + 1);
+                  } else {
+                    onClose();
+                  }
+                }}
+              >
+                <View style={{ flex: 1, justifyContent: "center" }}>
+                  <Image
+                    source={activeStory.imageUrl}
+                    style={{ width: "100%", height: "80%" }}
+                    contentFit="cover"
+                    transition={200}
+                    cachePolicy="memory-disk"
+                  />
+                </View>
+              </TouchableWithoutFeedback>
 
               {showMenu && (
                 <View
                   style={{
                     position: "absolute",
-                    top: 70,
+                    top: 76,
                     right: 16,
                     backgroundColor: COLORS.surface,
                     paddingVertical: 8,

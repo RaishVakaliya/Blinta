@@ -91,5 +91,6 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_story", ["storyId"])
+    .index("by_viewer", ["viewerId"])
     .index("by_viewer_and_story", ["viewerId", "storyId"]),
 });

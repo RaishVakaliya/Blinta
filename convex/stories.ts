@@ -59,21 +59,21 @@ export const getStories = query({
 
     if (visibleStories.length === 0) return [];
 
-    // Fetch user docs for all story authors
-    const uniqueUserIds = Array.from(
-      new Set(visibleStories.map((s) => s.userId)),
-    );
-    const userDocs = await Promise.all(
-      uniqueUserIds.map((id) => ctx.db.get(id)),
-    );
-    const userMap = new Map<Id<"users">, (typeof userDocs)[number]>();
-    uniqueUserIds.forEach((id, idx) => {
-      userMap.set(id, userDocs[idx]);
-    });
+    // Group by user: pick the latest story per user (one avatar per user)
+    const latestByUser = new Map<Id<"users">, (typeof visibleStories)[number]>();
+    for (const story of visibleStories) {
+      if (!latestByUser.has(story.userId)) {
+        latestByUser.set(story.userId, story);
+      }
+    }
 
-    const result = visibleStories
-      .map((story) => {
-        const user = userMap.get(story.userId);
+    const userIds = Array.from(latestByUser.keys());
+    const users = await Promise.all(userIds.map((id) => ctx.db.get(id)));
+
+    const result = userIds
+      .map((userId, index) => {
+        const user = users[index];
+        const story = latestByUser.get(userId)!;
         if (!user) return null;
 
         const isCurrentUser = user._id === currentUser._id;
@@ -91,7 +91,7 @@ export const getStories = query({
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
 
-    // Sort so current user's stories appear first, then by newest
+    // Sort so current user's avatar appears first, then by newest story
     result.sort((a, b) => {
       if (a.isCurrentUser !== b.isCurrentUser) {
         return a.isCurrentUser ? -1 : 1;
@@ -181,6 +181,19 @@ export const getUserStories = query({
     return stories
       .filter((s) => s.createdAt >= cutoff)
       .sort((a, b) => a.createdAt - b.createdAt);
+  },
+});
+
+export const getViewedStoryIds = query({
+  handler: async (ctx) => {
+    const currentUser = await getAuthenticatedUser(ctx);
+
+    const views = await ctx.db
+      .query("storyViews")
+      .withIndex("by_viewer", (q) => q.eq("viewerId", currentUser._id))
+      .collect();
+
+    return views.map((v) => v.storyId);
   },
 });
 
