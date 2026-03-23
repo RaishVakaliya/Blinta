@@ -4,6 +4,13 @@
 
 Blinta is a modern social media mobile application that enables users to share image-based posts, interact with others, and stay connected through a clean and intuitive mobile experience.
 
+### Screenshots
+
+<p align="center">
+  <img src="assets/images/app1.png" width="250" />
+  <img src="assets/images/app2.png" width="250" />
+</p>
+
 ## Features
 
 - **Authentication:** Secure user authentication using Google sign-in.
